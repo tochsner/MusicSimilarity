@@ -17,7 +17,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
 
     indexes = list(range(num_classes))
 
-    demo_spectrogram = load_all_slices_of_spectrogram(grouped_data[0][0], slice_width)
+    demo_spectrogram = load_all_slices_of_spectrogram("7zZUB3zucFzCMHVAsX7d0Z", slice_width)
 
     height = demo_spectrogram[0].shape[0]
     width = demo_spectrogram[0].shape[1]
@@ -31,12 +31,15 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
     for sample in range(num_samples // 2):
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
-
-        main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-        main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-        second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-        second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
         
+        try:
+            main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+            main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+            second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+            second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+        except:
+            continue
+
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
 
         costs = (losses.get_distance(outputs[0][ : embedding_lenght], outputs[2][ : embedding_lenght]),
@@ -85,7 +88,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1, : embedding_lenght] = outputs[2][ : embedding_lenght]
-            y_data[2 * sample + 1, embedding_lenght] = outputs[1][ : embedding_lenght]
+            y_data[2 * sample + 1, embedding_lenght :] = outputs[1][ : embedding_lenght]
 
     return x_data, y_data
 
