@@ -1,7 +1,7 @@
 class Logger():
     def __init__(self, name):
-        self.Name = name
+        self.name = name
 
     def log(self, text):
-        with open(self.Name + ".txt", "a+") as logFile:
-            logFile.write(str(text) + "\n")
+        with open(self.name + ".txt", "a+") as log_file:
+            log_file.write(str(text) + "\n")

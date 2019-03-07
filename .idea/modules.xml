@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Few-Shot-Learning/.idea/Few-Shot-Learning.iml" filepath="$PROJECT_DIR$/../Few-Shot-Learning/.idea/Few-Shot-Learning.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Genre-Classification/.idea/Genre-Classification.iml" filepath="$PROJECT_DIR$/../Genre-Classification/.idea/Genre-Classification.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MusicSimilarity.iml" filepath="$PROJECT_DIR$/.idea/MusicSimilarity.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../TinderBot/.idea/TinderBot.iml" filepath="$PROJECT_DIR$/../TinderBot/.idea/TinderBot.iml" />
+    </modules>
+  </component>
+</project>

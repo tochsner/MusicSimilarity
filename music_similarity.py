@@ -1,49 +1,43 @@
 """
-Trains a simple quadruplet cross-digit encoder on MNIST.
+Trains a quadruplet cross-playlist encoder on Spotify playlist data.
+This model can be used with or without pre-training.
 """
 
-from keras.optimizers import SGD
-from data.MNIST import *
+from models.simple_genre_model import *
 from helper.prepare_triplets import *
-from models.MNIST_basic_similarity_model import *
-from helper.losses_similarity import *
+from keras.optimizers import Adam
 
-input_shape = (28,28,1)
-input_lenght = 784
-embedding_lenght = 40
+decoder_factor = 0.6
 
-epochs = 100
-samples_per_epoch = 5000
-batch_size = 20
-number_test_samples = 2000
-lr = 0.5
+epochs = 30
+batch_size = 32
+batches_per_epoch = 100
+split_ratio = 0.8
+num_test_samples = 2000
 
-losses = Losses(input_lenght, embedding_lenght, decoder_factor=2)
+slice_width = 40
+embedding_length = 20
+decoder_output_length = 540
 
-data = load_data()
-data = prepare_data_for_keras(data)
-data_train = group_data(data[0])
-data_test = group_data(data[1])
+input_shape = (spectrogram_height, slice_width, 1)
 
-def trainModel():
-    model = build_model(input_shape, embedding_lenght)
-    model.compile('adam', losses.quadruplet_loss, metrics=[losses.quadruplet_metric])
+losses = Losses(embedding_length, decoder_output_length, decoder_factor)
 
-    for e in range(epochs):
-        for b in range(samples_per_epoch // batch_size):
-            (x_train, y_train) = createTrainingDataForQuadrupletLoss(model, data_train, batch_size, embedding_lenght)
-            model.fit(x_train, y_train, epochs=1, verbose=0)
-            
-        (x_test, y_test) = createTrainingDataForQuadrupletLoss(model, data_test, number_test_samples, embedding_lenght)
-        print(model.evaluate(x_test, y_test, verbose=0)[1])
+playlists = load_playlists()
+playlists_train, playlists_test = split_list(playlists, split_ratio)
 
-    (x_train, y_train) = createTrainingDataForQuadrupletLoss(model, data_train, number_test_samples * 5, embedding_lenght)
-    (x_test, y_test) = createTrainingDataForQuadrupletLoss(model, data_test, number_test_samples, embedding_lenght)
-    print("Model " + str(r) + " Training-Accuracy:" + str(model.evaluate(x_train, y_train, verbose=0)[1]))
-    print("Model " + str(r) + " Test-Accuracy:" + str(model.evaluate(x_test, y_test, verbose=0)[1]))
+model = build_model(input_shape, embedding_length, decoder_output_length)
 
-    #save model
-    model.save("saved_models/MNIST Similarity Mine " + str(r))
+model.compile(loss=losses.quadruplet_loss,
+              optimizer=Adam(),
+              metrics=[losses.quadruplet_metric])
 
-for i in range(10):
-    trainModel()
+test_data = create_quadruplets_for_similarity_learning(model, playlists_test, num_test_samples,
+                                                       embedding_length, slice_width)
+
+for e in range(epochs):
+    x_data, y_data = create_quadruplets_for_similarity_learning(model, playlists_train,
+                                                                batch_size * batches_per_epoch,
+                                                                embedding_length, slice_width)
+
+    model.fit(x_data, y_data, batch_size=batch_size, epochs=1, validation_data=test_data)
