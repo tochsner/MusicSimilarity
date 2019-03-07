@@ -12,7 +12,7 @@ spectrogram_path = "/home/tobia/Documents/ML/Data MA Sono"
 spectrogram_type = ".png"
 playlists_path = "data/Playlists.csv"
 
-spectrogram_height = 250
+spectrogram_height = 263
 
 """
 Imports a list of the songs in each playlist.

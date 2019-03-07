@@ -41,12 +41,12 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     flatten2 = Flatten()(concatenated2)
     flatten3 = Flatten()(concatenated3)
 
-    dense = Dense(120, activation='relu', name='dense1', trainable=False)(flatten3)
+    dense = Dense(120, activation='relu', name='dense5')(flatten3)
     encoder_output = Dense(embedding_length, activation='sigmoid', name='encoder_output')(dense)
 
     target_decoder_output = Concatenate()([flatten1, flatten2, flatten3, dense])
 
-    dense = Dense(120, activation='relu', name='dense2')(encoder_output)
+    dense = Dense(120, activation='relu', name='dense3')(encoder_output)
     decoder_output = Dense(decoder_output_length, activation='linear', name='decoder_output')(dense)
 
     output_layer = Concatenate()([encoder_output, decoder_output, target_decoder_output])
