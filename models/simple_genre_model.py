@@ -1,6 +1,7 @@
 from keras import backend as k
 from keras.models import Input, Model
-from keras.layers import Dense, Flatten, Conv2D, AveragePooling2D, MaxPooling2D, Lambda, Concatenate, BatchNormalization
+from keras.layers import Dense, Flatten, Conv2D, AveragePooling2D,\
+    MaxPooling2D, Lambda, Concatenate, BatchNormalization, Activation
 
 """
 Builds a simple convnet for music similarity with a quadruplet cross-playlist encoder.
@@ -41,13 +42,17 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     flatten2 = Flatten()(concatenated2)
     flatten3 = Flatten()(concatenated3)
 
-    dense = Dense(120, activation='relu', name='dense5')(flatten3)
-    encoder_output = Dense(embedding_length, activation='sigmoid', name='encoder_output')(dense)
+    normalized1 = Activation('sigmoid')(flatten1)
+    normalized2 = Activation('sigmoid')(flatten2)
+    normalized3 = Activation('sigmoid')(flatten3)
 
-    target_decoder_output = Concatenate()([flatten1, flatten2, flatten3, dense])
+    dense = Dense(120, activation='relu')(flatten3)
+    encoder_output = Dense(embedding_length, activation='sigmoid')(dense)
 
-    dense = Dense(120, activation='relu', name='dense3')(encoder_output)
-    decoder_output = Dense(decoder_output_length, activation='linear', name='decoder_output')(dense)
+    dense = Dense(120, activation='relu')(encoder_output)
+    decoder_output = Dense(decoder_output_length, activation='sigmoid')(dense)
+
+    target_decoder_output = Concatenate()([normalized1, normalized2, normalized3])
 
     output_layer = Concatenate()([encoder_output, decoder_output, target_decoder_output])
 
