@@ -5,8 +5,11 @@ Data gets formatted for the use with Keras and few-shot learning.
 
 import random
 import numpy as np
-from skimage.io import imread, imsave
+#from skimage.io import imread, imsave
 from keras.preprocessing.image import ImageDataGenerator
+
+def imread(path):
+    return np.zeros((300, 200))
 
 spectrogram_path = "/home/tobia/Documents/ML/Data MA Sono"
 spectrogram_type = ".png"

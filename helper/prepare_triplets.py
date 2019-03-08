@@ -2,16 +2,17 @@ import numpy as np
 import random
 from data.playlists import *
 
-from .losses_similarity import *
+from .losses import *
 
 """
 Generates input and output pairs for performing similarity learning with Keras, based on quadruplet-selection.
 The grouped data are Spotify-uri's of songs grouped by playlist.
 Output format of the Keras model: Embedding ; Output (Flatten), Target Decoder Output
-Format of y_train: Target Embedding ; Dissimilar Embedding
+Format of y_train: Target Embedding ; Dissimilar Embedding ; Target Decoder Output
 """
-def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, embedding_lenght, slice_width):
-    losses = Losses()
+def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, embedding_lenght,
+                                               decoder_output_length, slice_width):
+    mse = MeanSquareCostFunction()
 
     num_classes = len(grouped_data)
 
@@ -23,7 +24,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
     width = demo_spectrogram[0].shape[1]
 
     x_shape = (num_samples, height, width, 1)
-    y_shape = (num_samples, 2 * embedding_lenght)
+    y_shape = (num_samples, 2 * embedding_lenght + decoder_output_length)
 
     x_data = np.zeros(x_shape)
     y_data = np.zeros(y_shape)
@@ -42,75 +43,99 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
 
-        costs = (losses.get_distance(outputs[0][ : embedding_lenght], outputs[2][ : embedding_lenght]),
-                 losses.get_distance(outputs[0][ : embedding_lenght], outputs[3][ : embedding_lenght]),
-                 losses.get_distance(outputs[1][ : embedding_lenght], outputs[2][ : embedding_lenght]),
-                 losses.get_distance(outputs[1][ : embedding_lenght], outputs[3][ : embedding_lenght]))
+        main_embedding_1 = get_embedding(outputs[0], embedding_lenght)
+        main_embedding_2 = get_embedding(outputs[1], embedding_lenght)
+        second_embedding_1 = get_embedding(outputs[2], embedding_lenght)
+        second_embedding_2 = get_embedding(outputs[3], embedding_lenght)
 
-        argmin = np.argmin(costs)
+        main_decoder_output_1 = get_target_decoder_output(outputs[0], embedding_lenght, decoder_output_length)
+        main_decoder_output_2 = get_target_decoder_output(outputs[1], embedding_lenght, decoder_output_length)
+        second_decoder_output_1 = get_target_decoder_output(outputs[2], embedding_lenght, decoder_output_length)
+        second_decoder_output_2 = get_target_decoder_output(outputs[3], embedding_lenght, decoder_output_length)
 
-        if argmin == 0:
+        costs = (mse.get_cost(main_embedding_1, second_embedding_1),
+                 mse.get_cost(main_embedding_1, second_embedding_2),
+                 mse.get_cost(main_embedding_2, second_embedding_1),
+                 mse.get_cost(main_embedding_2, second_embedding_2))
+
+        arg_min = np.argmin(costs)
+
+        if arg_min == 0:
             # mainSample 1
             x_data[2 * sample] = main_sample1    
-            y_data[2 * sample, : embedding_lenght] = outputs[1][ : embedding_lenght]
-            y_data[2 * sample, embedding_lenght :] = outputs[2][ : embedding_lenght]
-
-            # secondSample 1
-            x_data[2 * sample + 1] = second_sample1           
-            y_data[2 * sample + 1, : embedding_lenght] = outputs[3][ : embedding_lenght]
-            y_data[2 * sample + 1, embedding_lenght :] = outputs[0][ : embedding_lenght]
-        elif argmin == 1:
-            # mainSample 1
-            x_data[2 * sample] = main_sample1    
-            y_data[2 * sample, : embedding_lenght] = outputs[1][ : embedding_lenght]
-            y_data[2 * sample, embedding_lenght :] = outputs[3][ : embedding_lenght]
-
-            # secondSample 2
-            x_data[2 * sample + 1] = second_sample2            
-            y_data[2 * sample + 1, : embedding_lenght] = outputs[2][ : embedding_lenght]
-            y_data[2 * sample + 1, embedding_lenght :] = outputs[0][ : embedding_lenght]
-        elif argmin == 2:
-            # mainSample 2
-            x_data[2 * sample] = main_sample2   
-            y_data[2 * sample, : embedding_lenght] = outputs[0][ : embedding_lenght]
-            y_data[2 * sample, embedding_lenght :] = outputs[2][ : embedding_lenght]
+            y_data[2 * sample] = get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2)
 
             # secondSample 1
             x_data[2 * sample + 1] = second_sample1
-            y_data[2 * sample + 1, : embedding_lenght] = outputs[3][ : embedding_lenght]
-            y_data[2 * sample + 1, embedding_lenght :] = outputs[1][ : embedding_lenght]
-        elif argmin == 3:
-            # mainSample 2
-            x_data[2 * sample] = main_sample2   
-            y_data[2 * sample, : embedding_lenght] = outputs[0][ : embedding_lenght]
-            y_data[2 * sample, embedding_lenght :] = outputs[3][ : embedding_lenght]
+            y_data[2 * sample + 1] = get_target_output(second_embedding_2, main_embedding_1, second_decoder_output_2)
+        elif arg_min == 1:
+            # mainSample 1
+            x_data[2 * sample] = main_sample1
+            y_data[2 * sample] = get_target_output(main_embedding_2, second_embedding_2, main_decoder_output_2)
 
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
-            y_data[2 * sample + 1, : embedding_lenght] = outputs[2][ : embedding_lenght]
-            y_data[2 * sample + 1, embedding_lenght :] = outputs[1][ : embedding_lenght]
+            y_data[2 * sample + 1] = get_target_output(second_embedding_1, main_embedding_1, second_decoder_output_1)
+        elif arg_min == 2:
+            # mainSample 2
+            x_data[2 * sample] = main_sample2
+            y_data[2 * sample] = get_target_output(main_embedding_1, second_embedding_1, main_decoder_output_1)
+
+            # secondSample 1
+            x_data[2 * sample + 1] = second_sample1
+            y_data[2 * sample + 1] = get_target_output(second_embedding_2, main_embedding_2, second_decoder_output_2)
+        elif arg_min == 3:
+            # mainSample 2
+            x_data[2 * sample] = main_sample2
+            y_data[2 * sample] = get_target_output(main_embedding_1, second_embedding_2, main_decoder_output_1)
+
+            # secondSample 2
+            x_data[2 * sample + 1] = second_sample2
+            y_data[2 * sample + 1] = get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
 
     return x_data, y_data
 
 
 """
-Returns the embedding of an output.
-Output format of the Keras model: Embedding ; Output (Flatten) ; Target Decoder Output
+Returns the embedding from a Keras output or y_true.
+Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
-def get_embedding(output, embedding_lenght):
-    return output[:embedding_lenght]
+def get_embedding(output, embedding_length):
+    return output[:embedding_length]
+
+
+"""
+Returns the dissimilar embedding from y_true.
+Target vector format: Similar Embedding ; Dissimilar Embedding ; Target Decoder Output
+"""
+def get_dissimilar_embedding(y_true, embedding_lenght):
+    return y_true[embedding_lenght:2*embedding_lenght]
+
+
 """
 Returns the decoder output.
-Output format of the Keras model: Embedding ; Output (Flatten) ; Target Decoder Output
+Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
 def get_decoder_output(output, embedding_lenght, decoder_output_lenght):
-    return output[embedding_lenght: embedding_lenght + decoder_output_lenght]
+    return output[embedding_lenght:embedding_lenght + decoder_output_lenght]
+
+
 """
 Returns the target decoder output.
-Output format of the Keras model: Embedding ; Output (Flatten) ; Target Decoder Output
+Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
-def get_decoder_output(output, embedding_lenght, decoder_output_lenght):
+def get_target_decoder_output(output, embedding_lenght, decoder_output_lenght):
     return output[embedding_lenght + decoder_output_lenght:]
+
+
+"""
+Returns a target output (y_true).
+Target vector format: Similar Embedding ; Dissimilar Embedding ; Target Decoder Output
+Unlike the Target Decoder Output of the Keras model, the Target Decoder Output of y_true
+can be the one of a similar song, used for a cross-song encoder.
+"""
+def get_target_output(similar_embedding, dissimilar_embedding, target_decoder_output):
+    return np.concatenate([similar_embedding, dissimilar_embedding, target_decoder_output])
 
 
 """
