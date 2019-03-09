@@ -6,6 +6,7 @@ This model can be used with or without pre-training.
 from models.simple_genre_model import *
 from helper.prepare_triplets import *
 from helper.losses_similarity import *
+import tensorflow as tf
 
 decoder_factor = 0.6
 
@@ -30,7 +31,7 @@ model = build_model(input_shape, embedding_length, decoder_output_length)
 
 model.compile(loss=losses.trio_loss,
               optimizer='adam',
-              metrics=[losses.quadruplet_metric])
+              metrics=['accuracy'])
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
@@ -39,7 +40,8 @@ test_data = create_quadruplets_for_similarity_learning(model, playlists_test, nu
 
 predictions = model.predict(test_data[0])
 
-print(losses.quadruplet_metric(test_data[1], predictions))
+with tf.Session() as sess:
+    print(losses.quadruplet_metric(test_data[1], predictions).eval())
 
 def training_sample_generator():
     while True:
