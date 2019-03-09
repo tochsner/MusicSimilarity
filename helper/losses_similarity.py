@@ -18,7 +18,7 @@ class Losses():
         self.decoder_factor = decoder_factor
         self.trio_factor = 1 - self.decoder_factor
 
-    def trio_loss(self, y_true, y_pred):            
+    def trio_loss(self, y_true, y_pred):
         output_embedding = get_embedding(y_pred, self.embedding_length)
         target_embedding = get_embedding(y_true, self.embedding_length)
         dissimilar_embedding = get_dissimilar_embedding(y_true, self.embedding_length)
@@ -32,7 +32,7 @@ class Losses():
         dissimilar_embedding = get_dissimilar_embedding(y_true, self.embedding_length)
 
         decoder_output = get_decoder_output(y_pred, self.embedding_length, self.decoder_output_length)
-        target_decoder_output = get_target_decoder_output(y_true, self.embedding_length, self.decoder_output_length)
+        target_decoder_output = get_similar_decoder_output(y_true, self.embedding_length)
         
         return self.decoder_factor * K.sum(K.square(decoder_output - target_decoder_output), axis=-1) + \
                self.trio_factor * K.sum(K.square(output_embedding - target_embedding), axis=-1) + \

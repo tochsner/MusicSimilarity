@@ -101,7 +101,10 @@ Returns the embedding from a Keras output or y_true.
 Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
 def get_embedding(output, embedding_length):
-    return output[:embedding_length]
+    if len(output.shape) == 1:
+        return output[:embedding_length]
+    else:
+        return output[:, :embedding_length]
 
 
 """
@@ -109,7 +112,10 @@ Returns the dissimilar embedding from y_true.
 Target vector format: Similar Embedding ; Dissimilar Embedding ; Target Decoder Output
 """
 def get_dissimilar_embedding(y_true, embedding_lenght):
-    return y_true[embedding_lenght:2*embedding_lenght]
+    if len(y_true.shape) == 1:
+        return y_true[embedding_lenght:2*embedding_lenght]
+    else:
+        return y_true[:, embedding_lenght:2 * embedding_lenght]
 
 
 """
@@ -117,7 +123,10 @@ Returns the decoder output.
 Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
 def get_decoder_output(output, embedding_lenght, decoder_output_lenght):
-    return output[embedding_lenght:embedding_lenght + decoder_output_lenght]
+    if len(output.shape) == 1:
+        return output[embedding_lenght:embedding_lenght + decoder_output_lenght]
+    else:
+        return output[:, embedding_lenght:embedding_lenght + decoder_output_lenght]
 
 
 """
@@ -125,7 +134,21 @@ Returns the target decoder output.
 Output format of the Keras model: Embedding ; Decoder Output (Flatten) ; Target Decoder Output
 """
 def get_target_decoder_output(output, embedding_lenght, decoder_output_lenght):
-    return output[embedding_lenght + decoder_output_lenght:]
+    if len(output.shape) == 1:
+        return output[embedding_lenght + decoder_output_lenght:]
+    else:
+        return output[:, embedding_lenght + decoder_output_lenght:]
+
+
+"""
+Returns the decoder output of a similar song from y_true.
+Target vector format: Similar Embedding ; Dissimilar Embedding ; Target Decoder Output
+"""
+def get_similar_decoder_output(y_true, embedding_lenght):
+    if len(y_true.shape) == 1:
+        return y_true[2*embedding_lenght:]
+    else:
+        return y_true[:, 2*embedding_lenght:]
 
 
 """
