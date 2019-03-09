@@ -14,6 +14,9 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
                                                decoder_output_length, slice_width):
     mse = MeanSquareCostFunction()
 
+    print(len(grouped_data))
+    print(sum([len(x) for x in grouped_data]))
+
     num_classes = len(grouped_data)
 
     indexes = list(range(num_classes))
