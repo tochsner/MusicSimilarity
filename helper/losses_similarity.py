@@ -45,16 +45,5 @@ class Losses():
         target_embedding = get_embedding(y_true, self.embedding_length)
         dissimilar_embedding = get_dissimilar_embedding(y_true, self.embedding_length)
       
-        accuracy = 0
-        tests = 0
-
-        for i in range(y_true.shape[0]):
-            if self.mse.get_cost(output_embedding[i], target_embedding[i]) < self.mse.get_cost(output_embedding[i], dissimilar_embedding[i]):
-                accuracy += 1
-            print(output_embedding[i], target_embedding[i], dissimilar_embedding[i])
-            tests += 1
-
-        print(accuracy / tests)
-
         return K.mean(K.cast(K.less(K.sum(K.square(output_embedding - target_embedding), axis=-1),
                                     K.sum(K.square(output_embedding - dissimilar_embedding), axis=-1)), 'float16'))

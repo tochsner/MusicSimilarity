@@ -8,7 +8,7 @@ from helper.prepare_triplets import *
 from helper.losses_similarity import *
 import tensorflow as tf
 
-decoder_factor = 0.6
+decoder_factor = 0
 
 epochs = 30
 batch_size = 64
@@ -29,9 +29,9 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
 
-model.compile(loss=losses.trio_loss,
+model.compile(loss=losses.quadruplet_loss,
               optimizer='adam',
-              metrics=['accuracy'])
+              metrics=[losses.quadruplet_metric])
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
