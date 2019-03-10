@@ -4,14 +4,14 @@ This model can be used with or without pre-training.
 """
 
 from models.simple_genre_model import *
-from helper.prepare_triplets import *
+from helper.dataset_tools import *
 from helper.losses_similarity import *
 import tensorflow as tf
 
 decoder_factor = 0.6
 
 epochs = 30
-batch_size = 64
+batch_size = 16
 batches_per_epoch = 100
 split_ratio = 0.8
 num_test_samples = 1000
@@ -30,8 +30,8 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 model = build_model(input_shape, embedding_length, decoder_output_length)
 
 model.compile(loss=losses.trio_loss,
-              optimizer='adam',
-              metrics=['accuracy'])
+              optimizer='sgd',
+              metrics=[losses.quadruplet_metric])
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
@@ -49,5 +49,4 @@ def training_sample_generator():
                                                          embedding_length, decoder_output_length, slice_width)
 
 
-model.fit_generator(training_sample_generator(), batches_per_epoch, epochs, validation_data=test_data)
-
+model.fit_generator(training_sample_generator(), epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data)

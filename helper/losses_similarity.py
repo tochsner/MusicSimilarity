@@ -1,19 +1,15 @@
 """
 The custom losses for similarity with siamese networks with keras.
-Output format of the Keras model (y_pred): Embedding ; Decoder Output (Flatten)
-Format of y_true: Target Embedding ; Dissimlilar Embedding ; Target Decoder Output
+Output format of the Keras model (y_pred): Embedding ; Decoder Output (Flatten) ; Target Decoder Output
+Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Output
 """
 
 from keras import backend as K
 from .prepare_triplets import *
-from .losses import *
 
-
-class Losses():
-    def __init__(self, embedding_lenght=0, decoder_output_length=0, decoder_factor=0.5):
-        self.mse = MeanSquareCostFunction()
-
-        self.embedding_length = embedding_lenght
+class Losses:
+    def __init__(self, embedding_length=0, decoder_output_length=0, decoder_factor=0.5):
+        self.embedding_length = embedding_length
         self.decoder_output_length = decoder_output_length
 
         self.decoder_factor = decoder_factor
@@ -44,17 +40,6 @@ class Losses():
         output_embedding = get_embedding(y_pred, self.embedding_length)
         target_embedding = get_embedding(y_true, self.embedding_length)
         dissimilar_embedding = get_dissimilar_embedding(y_true, self.embedding_length)
-      
-        accuracy = 0
-        tests = 0
-
-        for i in range(y_true.shape[0]):
-            if self.mse.get_cost(output_embedding[i], target_embedding[i]) < self.mse.get_cost(output_embedding[i], dissimilar_embedding[i]):
-                accuracy += 1
-            print(output_embedding[i], target_embedding[i], dissimilar_embedding[i])
-            tests += 1
-
-        print(accuracy / tests)
 
         return K.mean(K.cast(K.less(K.sum(K.square(output_embedding - target_embedding), axis=-1),
                                     K.sum(K.square(output_embedding - dissimilar_embedding), axis=-1)), 'float16'))

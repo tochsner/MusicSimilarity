@@ -42,9 +42,9 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     flatten2 = Flatten()(concatenated2)
     flatten3 = Flatten()(concatenated3)
 
-    normalized1 = Activation('sigmoid')(flatten1)
-    normalized2 = Activation('sigmoid')(flatten2)
-    normalized3 = Activation('sigmoid')(flatten3)
+    normalized1 = Activation('linear')(flatten1)
+    normalized2 = Activation('linear')(flatten2)
+    normalized3 = Activation('linear')(flatten3)
 
     dense = Dense(120, activation='relu')(flatten3)
     encoder_output = Dense(embedding_length, activation='sigmoid')(dense)
@@ -54,7 +54,7 @@ def build_model(input_shape, embedding_length, decoder_output_length):
 
     target_decoder_output = Concatenate()([normalized1, normalized2, normalized3])
 
-    output_layer = Concatenate()([encoder_output, decoder_output, target_decoder_output])
+    output_layer = Concatenate()([target_decoder_output, encoder_output, decoder_output])
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
