@@ -69,6 +69,8 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
 
         arg_min = np.argmin(costs)
 
+        arg_min = 0
+
         if arg_min == 0:
             # mainSample 1
             x_data[2 * sample] = main_sample1    
@@ -101,8 +103,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
-
-    print(accuracy / tests)
 
     return x_data, y_data
 

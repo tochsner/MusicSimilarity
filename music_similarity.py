@@ -8,7 +8,7 @@ from helper.dataset_tools import *
 from helper.losses_similarity import *
 import tensorflow as tf
 
-decoder_factor = 0
+decoder_factor = 0.5
 
 epochs = 30
 batch_size = 16
@@ -38,15 +38,10 @@ model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_fina
 test_data = create_quadruplets_for_similarity_learning(model, playlists_test, num_test_samples,
                                                        embedding_length, decoder_output_length, slice_width)
 
-predictions = model.predict(test_data[0])
-
-with tf.Session() as sess:
-    print(losses.quadruplet_metric(test_data[1], predictions).eval())
-
 def training_sample_generator():
     while True:
         yield create_quadruplets_for_similarity_learning(model, playlists_train, batch_size,
                                                          embedding_length, decoder_output_length, slice_width)
 
 
-model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data)
+model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data, verbose=2)
