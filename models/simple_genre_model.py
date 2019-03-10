@@ -17,11 +17,11 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     width = input_shape[1]
 
     input_layer = Input(input_shape)
-    conv_layer1 = Conv2D(60, (height, 1), activation='relu', name='conv1', trainable=False)(input_layer)
+    conv_layer1 = Conv2D(60, (height, 1), activation='relu', name='conv1')(input_layer)
     conv_layer1 = BatchNormalization()(conv_layer1)
-    conv_layer2 = Conv2D(60, (1, 4), activation='relu', name='conv2', trainable=False)(conv_layer1)
+    conv_layer2 = Conv2D(60, (1, 4), activation='relu', name='conv2')(conv_layer1)
     conv_layer2 = BatchNormalization()(conv_layer2)
-    conv_layer3 = Conv2D(60, (1, 4), activation='relu', name='conv3', trainable=False)(conv_layer2)
+    conv_layer3 = Conv2D(60, (1, 4), activation='relu', name='conv3')(conv_layer2)
     conv_layer3 = BatchNormalization()(conv_layer3)
 
     avg_layer1 = AveragePooling2D((1, width))(conv_layer1)
@@ -42,17 +42,14 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     flatten2 = Flatten()(concatenated2)
     flatten3 = Flatten()(concatenated3)
 
-    normalized1 = Activation('linear')(flatten1)
-    normalized2 = Activation('linear')(flatten2)
-    normalized3 = Activation('linear')(flatten3)
-
     dense = Dense(120, activation='relu')(flatten3)
     encoder_output = Dense(embedding_length, activation='sigmoid')(dense)
 
     dense = Dense(120, activation='relu')(encoder_output)
     decoder_output = Dense(decoder_output_length, activation='sigmoid')(dense)
 
-    target_decoder_output = Concatenate()([normalized1, normalized2, normalized3])
+    target_decoder_output = Concatenate()([flatten1, flatten2, flatten3])
+    target_decoder_output = Activation('sigmoid')(target_decoder_output)
 
     output_layer = Concatenate()([target_decoder_output, encoder_output, decoder_output])
 

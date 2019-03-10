@@ -33,7 +33,7 @@ model.compile(loss=losses.trio_loss,
               optimizer='sgd',
               metrics=[losses.quadruplet_metric])
 
-model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
+#model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
 test_data = create_quadruplets_for_similarity_learning(model, playlists_test, num_test_samples,
                                                        embedding_length, decoder_output_length, slice_width)
@@ -49,4 +49,4 @@ def training_sample_generator():
                                                          embedding_length, decoder_output_length, slice_width)
 
 
-model.fit_generator(training_sample_generator(), epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data)
+model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data)
