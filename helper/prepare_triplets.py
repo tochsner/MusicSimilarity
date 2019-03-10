@@ -1,5 +1,3 @@
-import numpy as np
-import random
 from data.playlists import *
 
 from .losses import *

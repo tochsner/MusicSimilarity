@@ -8,7 +8,7 @@ from helper.dataset_tools import *
 from helper.losses_similarity import *
 import tensorflow as tf
 
-decoder_factor = 0.6
+decoder_factor = 0
 
 epochs = 30
 batch_size = 16
