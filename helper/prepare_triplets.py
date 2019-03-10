@@ -8,8 +8,15 @@ The grouped data are Spotify-uri's of songs grouped by playlist.
 Output format of the Keras model: Embedding ; Decoder Output ; Target Decoder Output
 Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Output
 """
+
+accuracy = 0
+tests = 0
+
 def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, embedding_length,
                                                decoder_output_length, slice_width):
+    global tests
+    global accuracy
+
     mse = MeanSquareCostFunction()
 
     num_classes = len(grouped_data)
@@ -26,9 +33,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
 
     x_data = np.zeros(x_shape)
     y_data = np.zeros(y_shape)
-
-    accuracy = 0
-    tests = 0
 
     for sample in range(num_samples // 2):
         main_index = random.choice(indexes)
@@ -59,7 +63,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
                  mse.get_cost(main_embedding_2, second_embedding_1),
                  mse.get_cost(main_embedding_2, second_embedding_2))
 
-        if costs[0] < costs[1]:
+        if (mse.get_cost(main_embedding_1, main_embedding_2) < mse.get_cost(main_embedding_1, second_embedding_1)):
             accuracy += 1
         tests += 1
 

@@ -30,10 +30,10 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 model = build_model(input_shape, embedding_length, decoder_output_length)
 
 model.compile(loss=losses.trio_loss,
-              optimizer='sgd',
+              optimizer='adam',
               metrics=[losses.quadruplet_metric])
 
-#model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
+model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
 test_data = create_quadruplets_for_similarity_learning(model, playlists_test, num_test_samples,
                                                        embedding_length, decoder_output_length, slice_width)

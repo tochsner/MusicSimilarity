@@ -51,7 +51,7 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     target_decoder_output = Concatenate()([flatten1, flatten2, flatten3])
     target_decoder_output = Activation('sigmoid')(target_decoder_output)
 
-    output_layer = Concatenate()([target_decoder_output, encoder_output, decoder_output])
+    output_layer = Concatenate()([encoder_output, decoder_output, target_decoder_output])
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
