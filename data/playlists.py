@@ -8,10 +8,6 @@ import numpy as np
 from skimage.io import imread, imsave
 from keras.preprocessing.image import ImageDataGenerator
 
-#def imread(path):
-#    return np.zeros((500, 100)) + int(path[0])
-
-
 spectrogram_path = "/home/tobia/Documents/ML/Data MA Sono"
 spectrogram_type = ".png"
 playlists_path = "data/Playlists.csv"

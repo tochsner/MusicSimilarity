@@ -6,12 +6,6 @@ This model can be used with or without pre-training.
 from models.simple_genre_model import *
 from helper.dataset_tools import *
 from helper.losses_similarity import *
-from keras.optimizers import SGD
-import random
-import tensorflow as tf
-
-#np.random.seed(seed=0)
-#random.seed(a=0)
 
 decoder_factor = 0.5
 
@@ -49,7 +43,7 @@ def training_sample_generator():
 
 def test_sample_generator():
     while True:
-        yield create_quadruplets_for_similarity_learning(model, playlists_test, batch_size,
+        yield create_trios_for_similarity_learning(model, playlists_test, batch_size,
                                                          output_helper, slice_width)
 
 model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch,

@@ -30,6 +30,11 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
 
+        main_sample1 = None
+        main_sample2 = None
+        second_sample1 = None
+        second_sample2 = None
+
         exception = True
 
         while exception:
@@ -93,5 +98,56 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
+
+    return x_data, y_data
+
+
+def create_trios_for_similarity_learning(model, grouped_data, num_samples, output_helper, slice_width):
+    mse = MeanSquareCostFunction()
+
+    num_classes = len(grouped_data)
+
+    indexes = list(range(num_classes))
+
+    demo_spectrogram = load_random_slice_of_spectrogram("7zZUB3zucFzCMHVAsX7d0Z", slice_width)
+
+    height = demo_spectrogram.shape[0]
+    width = demo_spectrogram.shape[1]
+
+    x_shape = (num_samples, height, width, 1)
+    y_shape = (num_samples, 2 * output_helper.embedding_length + output_helper.decoder_output_length)
+
+    x_data = np.zeros(x_shape)
+    y_data = np.zeros(y_shape)
+
+    for sample in range(num_samples):
+        main_index = random.choice(indexes)
+        second_index = random.choice([index for index in indexes if index != main_index])
+
+        exception = True
+
+        main_sample1 = None
+        main_sample2 = None
+        second_sample1 = None
+
+        while exception:
+            try:
+                main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+                main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+                second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]),
+                                                                  slice_width)
+                exception = False
+            except:
+                pass
+
+        outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1]))
+
+        main_embedding_2 = output_helper.get_embedding(outputs[1])
+        second_embedding_1 = output_helper.get_embedding(outputs[2])
+        main_decoder_output_2 = output_helper.get_target_decoder_output(outputs[1])
+
+        x_data[sample] = main_sample1
+        y_data[sample] = output_helper.get_target_output(main_embedding_2, second_embedding_1,
+                                                             main_decoder_output_2)
 
     return x_data, y_data

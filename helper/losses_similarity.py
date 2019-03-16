@@ -4,7 +4,6 @@ The custom losses for similarity with siamese networks with keras.
 
 from keras import backend as K
 from .prepare_triplets import *
-import tensorflow as tf
 
 class Losses:
     def __init__(self, output_helper, decoder_factor=0.5):
