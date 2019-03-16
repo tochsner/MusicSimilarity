@@ -1,7 +1,5 @@
 """
 The custom losses for similarity with siamese networks with keras.
-Output format of the Keras model (y_pred): Embedding ; Decoder Output (Flatten) ; Target Decoder Output
-Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Output
 """
 
 from keras import backend as K

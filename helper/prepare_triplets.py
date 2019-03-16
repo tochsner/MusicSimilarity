@@ -1,5 +1,4 @@
 from data.playlists import *
-
 from .losses import *
 
 """
@@ -22,10 +21,10 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
 
     indexes = list(range(num_classes))
 
-    demo_spectrogram = load_all_slices_of_spectrogram("7zZUB3zucFzCMHVAsX7d0Z", slice_width)
+    demo_spectrogram = load_random_slice_of_spectrogram("7zZUB3zucFzCMHVAsX7d0Z", slice_width)
 
-    height = demo_spectrogram[0].shape[0]
-    width = demo_spectrogram[0].shape[1]
+    height = demo_spectrogram.shape[0]
+    width = demo_spectrogram.shape[1]
 
     x_shape = (num_samples, height, width, 1)
     y_shape = (num_samples, 2 * output_helper.embedding_length + output_helper.decoder_output_length)
@@ -36,14 +35,14 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
     for sample in range(num_samples // 2):
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
-        
-        try:
-            main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-            main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-            second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-            second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-        except:
-            continue
+
+        #try:
+        main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+        main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+        second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+        second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+        #except:
+        #    continue
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
 
@@ -67,8 +66,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         tests += 1
 
         arg_min = np.argmin(costs)
-
-        arg_min = 0
 
         if arg_min == 0:
             # mainSample 1

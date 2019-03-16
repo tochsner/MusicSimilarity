@@ -6,25 +6,23 @@ This model can be used with or without pre-training.
 from models.simple_genre_model import *
 from helper.dataset_tools import *
 from helper.losses_similarity import *
+from keras.optimizers import SGD
 import tensorflow as tf
 
 decoder_factor = 0.5
 
-epochs = 30
+epochs = 1
 batch_size = 16
-batches_per_epoch = 100
+batches_per_epoch = 1
 split_ratio = 0.8
-num_test_samples = 1000
+num_test_samples = 10
 
 slice_width = 40
+input_shape = (spectrogram_height, slice_width, 1)
 embedding_length = 20
 decoder_output_length = 540
 
 output_helper = OutputHelper(embedding_length, decoder_output_length)
-
-input_shape = (spectrogram_height, slice_width, 1)
-
-
 
 losses = Losses(output_helper, decoder_factor)
 
@@ -32,9 +30,8 @@ playlists = load_playlists()
 playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
-
 model.compile(loss=losses.trio_loss,
-              optimizer='adam',
+              optimizer=SGD(0.4),
               metrics=[losses.quadruplet_metric])
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)

@@ -13,6 +13,11 @@ def split_list(original_list, r):
     return original_list[:number_samples_1], original_list[number_samples_1:]
 
 
+"""
+Helper class for everything related to the construction and reading out of the model output and y_true.
+Output format of the Keras model (y_pred): Embedding ; Decoder Output (Flatten) ; Target Decoder Output
+Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Output
+"""
 class OutputHelper:
 
     def __init__(self, embedding_length, decoder_output_length):
