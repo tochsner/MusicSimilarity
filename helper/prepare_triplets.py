@@ -97,6 +97,25 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
 
+        yt = np.array([output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2),
+                       output_helper.get_target_output(main_embedding_1, second_embedding_1, main_decoder_output_1),
+                       output_helper.get_target_output(second_embedding_2, main_embedding_2, second_decoder_output_2),
+                       output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)])
+        yp = np.array(outputs)
+
+        print(quadruplet_metric(yt, yp))
+
     print(accuracy / tests)
 
+
+
     return x_data, y_data
+
+
+def quadruplet_metric(y_true, y_pred):
+    output_embedding = self.output_helper.get_embedding(y_pred)
+    target_embedding = self.output_helper.get_embedding(y_true)
+    dissimilar_embedding = self.output_helper.get_dissimilar_embedding(y_true)
+
+    return np.mean(np.cast(np.less(np.sum(np.square(output_embedding - target_embedding), axis=-1),
+                                np.sum(np.square(output_embedding - dissimilar_embedding), axis=-1)), 'float16'))
