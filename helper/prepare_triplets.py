@@ -9,9 +9,6 @@ Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Out
 """
 
 def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, output_helper, slice_width):
-    accuracy = 0
-    tests = 0
-    
     mse = MeanSquareCostFunction()
 
     num_classes = len(grouped_data)
@@ -61,13 +58,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
                  mse.get_cost(main_embedding_2, second_embedding_1),
                  mse.get_cost(main_embedding_2, second_embedding_2))
 
-        #if (mse.get_cost(main_embedding_1, main_embedding_2) < mse.get_cost(main_embedding_1, second_embedding_1)):
-        accuracy += mse.get_cost(main_embedding_1, main_embedding_2) - costs[0]
-        tests += 1
-
         arg_min = np.argmin(costs)
-
-        arg_min = 0
 
         if arg_min == 0:
             # mainSample 1
@@ -103,7 +94,5 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
-
-    print(accuracy / tests)
 
     return x_data, y_data
