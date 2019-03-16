@@ -55,6 +55,4 @@ def build_model(input_shape, embedding_length, decoder_output_length):
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
-    model.summary()
-
     return model

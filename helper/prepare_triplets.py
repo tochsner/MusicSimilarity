@@ -8,12 +8,9 @@ Output format of the Keras model: Embedding ; Decoder Output ; Target Decoder Ou
 Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Output
 """
 
-accuracy = 0
-tests = 0
-
 def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, output_helper, slice_width):
-    global tests
-    global accuracy
+    tests = 0
+    accuracy = 0
 
     mse = MeanSquareCostFunction()
 
@@ -36,13 +33,13 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
 
-        #try:
-        main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-        main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-        second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-        second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-        #except:
-        #    continue
+        try:
+            main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+            main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+            second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+            second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+        except:
+            continue
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
 
@@ -99,5 +96,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
+
+    print(accuracy / tests)
 
     return x_data, y_data

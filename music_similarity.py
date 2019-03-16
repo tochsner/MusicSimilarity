@@ -11,11 +11,13 @@ import tensorflow as tf
 
 decoder_factor = 0.5
 
-epochs = 1
+epochs = 30
 batch_size = 16
 batches_per_epoch = 1
 split_ratio = 0.8
-num_test_samples = 10
+num_test_samples = 100
+
+lr = 0
 
 slice_width = 40
 input_shape = (spectrogram_height, slice_width, 1)
@@ -31,7 +33,7 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
 model.compile(loss=losses.trio_loss,
-              optimizer=SGD(0.4),
+              optimizer=SGD(lr),
               metrics=[losses.quadruplet_metric])
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
