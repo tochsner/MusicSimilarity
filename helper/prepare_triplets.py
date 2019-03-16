@@ -38,6 +38,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
             second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
         except:
+            sample -= 1
             continue
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
