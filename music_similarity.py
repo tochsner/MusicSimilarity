@@ -15,7 +15,7 @@ random.seed(a=0)
 
 decoder_factor = 0.5
 
-epochs = 30
+epochs = 1
 batch_size = 500
 batches_per_epoch = 1
 split_ratio = 0.8
@@ -58,7 +58,14 @@ def test_sample_generator():
 tdata = create_quadruplets_for_similarity_learning(model, playlists_train, batch_size,
                                                          output_helper, slice_width)
 
-model.fit(tdata[0], tdata[1], epochs=5)
+#model.fit(tdata[0], tdata[1], epochs=5)
+
+print(model.evaluate(tdata[0], tdata[1]))
+
+pred = model.predict_on_batch(tdata[0])
+
+with tf.Session().as_default() as sess:
+    print(losses.quadruplet_metric(tdata[1], pred).eval())
 
 #model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch,
 #                    validation_data = test_sample_generator(), validation_steps=batches_test_samples, verbose=2)

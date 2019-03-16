@@ -9,9 +9,6 @@ Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Out
 """
 
 def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, output_helper, slice_width):
-    tests = 0
-    accuracy = 0
-
     mse = MeanSquareCostFunction()
 
     num_classes = len(grouped_data)
@@ -58,10 +55,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
                  mse.get_cost(main_embedding_2, second_embedding_1),
                  mse.get_cost(main_embedding_2, second_embedding_2))
 
-        if (mse.get_cost(main_embedding_1, main_embedding_2) < mse.get_cost(main_embedding_1, second_embedding_1)):
-            accuracy += 1
-        tests += 1
-
         arg_min = np.argmin(costs)
 
         if arg_min == 0:
@@ -97,26 +90,4 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
 
-        yt = np.array([output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2),
-                       output_helper.get_target_output(main_embedding_1, second_embedding_1, main_decoder_output_1),
-                       output_helper.get_target_output(second_embedding_2, main_embedding_2, second_decoder_output_2),
-                       output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)])
-        yp = np.array(outputs)
-
-#        print(quadruplet_metric(yt, yp, output_helper))
-
-    print(accuracy / tests)
-
-
-
     return x_data, y_data
-
-
-def quadruplet_metric(y_true, y_pred, output_helper):
-    output_embedding = output_helper.get_embedding(y_pred)
-    target_embedding = output_helper.get_embedding(y_true)
-    dissimilar_embedding = output_helper.get_dissimilar_embedding(y_true)
-
-    return np.mean(np.sum(np.square(output_embedding - target_embedding), axis=-1) -
-                                np.sum(np.square(output_embedding - dissimilar_embedding), axis=-1))
-    

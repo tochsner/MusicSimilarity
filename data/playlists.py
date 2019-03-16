@@ -9,7 +9,7 @@ from skimage.io import imread, imsave
 from keras.preprocessing.image import ImageDataGenerator
 
 #def imread(path):
-#    return np.zeros((500, 100)) + int(path[0]) * 256
+#    return np.zeros((500, 100)) + int(path[0])
 
 
 spectrogram_path = "/home/tobia/Documents/ML/Data MA Sono"
