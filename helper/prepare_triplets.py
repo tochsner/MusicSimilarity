@@ -32,14 +32,17 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
 
-        try:
-            main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-            main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
-            second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-            second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
-        except:
-            sample -= 1
-            continue
+        exception = True
+
+        while exception:
+            try:
+                main_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+                main_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[main_index]), slice_width)
+                second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+                second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
+                exception = False
+            except:
+                pass
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
 
@@ -92,7 +95,5 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
-
-        n += 1
 
     return x_data[:n], y_data[:n]
