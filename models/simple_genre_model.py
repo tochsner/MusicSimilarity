@@ -17,11 +17,11 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     width = input_shape[1]
 
     input_layer = Input(input_shape)
-    conv_layer1 = Conv2D(60, (height, 1), activation='relu', name='conv1')(input_layer)
+    conv_layer1 = Conv2D(60, (height, 1), activation='relu', name='conv1', trainable=False)(input_layer)
     conv_layer1 = BatchNormalization()(conv_layer1)
-    conv_layer2 = Conv2D(60, (1, 4), activation='relu', name='conv2')(conv_layer1)
+    conv_layer2 = Conv2D(60, (1, 4), activation='relu', name='conv2', trainable=False)(conv_layer1)
     conv_layer2 = BatchNormalization()(conv_layer2)
-    conv_layer3 = Conv2D(60, (1, 4), activation='relu', name='conv3')(conv_layer2)
+    conv_layer3 = Conv2D(60, (1, 4), activation='relu', name='conv3', trainable=False)(conv_layer2)
     conv_layer3 = BatchNormalization()(conv_layer3)
 
     avg_layer1 = AveragePooling2D((1, width))(conv_layer1)

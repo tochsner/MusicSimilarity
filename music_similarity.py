@@ -21,8 +21,6 @@ batches_per_epoch = 100
 split_ratio = 1
 batches_test_samples = 100
 
-lr = 0.1
-
 slice_width = 40
 input_shape = (spectrogram_height, slice_width, 1)
 embedding_length = 20
@@ -37,9 +35,11 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
 model.compile(loss=losses.trio_loss,
-              optimizer=SGD(lr),
+              optimizer='adam',
               metrics=[losses.quadruplet_metric])
+
 model._make_predict_function()
+
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
 def training_sample_generator():
@@ -53,5 +53,5 @@ def test_sample_generator():
         yield create_quadruplets_for_similarity_learning(model, playlists_test, batch_size,
                                                          output_helper, slice_width)
 
-model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch)
-#                    validation_data = test_sample_generator(), validation_steps=batches_test_samples, verbose=2)
+model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch,
+                    validation_data = test_sample_generator(), validation_steps=batches_test_samples)
