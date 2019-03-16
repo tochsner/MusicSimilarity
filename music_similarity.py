@@ -15,11 +15,11 @@ import tensorflow as tf
 
 decoder_factor = 0.5
 
-epochs = 30
+epochs = 50
 batch_size = 16
-batches_per_epoch = 100
-split_ratio = 1
-batches_test_samples = 100
+batches_per_epoch = 200
+split_ratio = 0.7
+batches_test_samples = 40
 
 slice_width = 40
 input_shape = (spectrogram_height, slice_width, 1)
@@ -34,7 +34,7 @@ playlists = load_playlists()
 playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
-model.compile(loss=losses.trio_loss,
+model.compile(loss=losses.quadruplet_loss,
               optimizer='adam',
               metrics=[losses.quadruplet_metric])
 
@@ -46,7 +46,6 @@ def training_sample_generator():
     while True:
         yield create_quadruplets_for_similarity_learning(model, playlists_train, batch_size,
                                                          output_helper, slice_width)
-
 
 def test_sample_generator():
     while True:
