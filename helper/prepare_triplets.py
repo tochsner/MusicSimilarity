@@ -26,8 +26,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
     x_data = np.zeros(x_shape)
     y_data = np.zeros(y_shape)
 
-    n = 0
-
     for sample in range(num_samples // 2):
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
@@ -96,4 +94,4 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
 
-    return x_data[:n], y_data[:n]
+    return x_data, y_data
