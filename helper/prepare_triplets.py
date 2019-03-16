@@ -9,6 +9,9 @@ Format of y_true: Similar Embedding ; Dissimilar Embedding ; Similar Decoder Out
 """
 
 def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples, output_helper, slice_width):
+    accuracy = 0
+    tests = 0
+    
     mse = MeanSquareCostFunction()
 
     num_classes = len(grouped_data)
@@ -36,6 +39,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
             second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
         except:
+            sample -= 1
             continue
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
@@ -44,6 +48,8 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         main_embedding_2 = output_helper.get_embedding(outputs[1])
         second_embedding_1 = output_helper.get_embedding(outputs[2])
         second_embedding_2 = output_helper.get_embedding(outputs[3])
+        
+        print(main_embedding_1[:2])
 
         main_decoder_output_1 = output_helper.get_target_decoder_output(outputs[0])
         main_decoder_output_2 = output_helper.get_target_decoder_output(outputs[1])
@@ -55,16 +61,24 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
                  mse.get_cost(main_embedding_2, second_embedding_1),
                  mse.get_cost(main_embedding_2, second_embedding_2))
 
+        #if (mse.get_cost(main_embedding_1, main_embedding_2) < mse.get_cost(main_embedding_1, second_embedding_1)):
+        accuracy += mse.get_cost(main_embedding_1, main_embedding_2) - costs[0]
+        tests += 1
+
         arg_min = np.argmin(costs)
+
+        arg_min = 0
 
         if arg_min == 0:
             # mainSample 1
             x_data[2 * sample] = main_sample1    
             y_data[2 * sample] = output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2)
 
+            x_data[2 * sample + 1] = main_sample1    
+            y_data[2 * sample + 1] = output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2)
             # secondSample 1
-            x_data[2 * sample + 1] = second_sample1
-            y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_2, main_embedding_1, second_decoder_output_2)
+            #x_data[2 * sample + 1] = second_sample1
+            #y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_2, main_embedding_1, second_decoder_output_2)
         elif arg_min == 1:
             # mainSample 1
             x_data[2 * sample] = main_sample1
@@ -89,5 +103,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             # secondSample 2
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
+
+    print(accuracy / tests)
 
     return x_data, y_data
