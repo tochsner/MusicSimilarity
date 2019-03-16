@@ -39,7 +39,7 @@ model = build_model(input_shape, embedding_length, decoder_output_length)
 model.compile(loss=losses.trio_loss,
               optimizer=SGD(lr),
               metrics=[losses.quadruplet_metric])
-
+model._make_predict_function()
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
 def training_sample_generator():

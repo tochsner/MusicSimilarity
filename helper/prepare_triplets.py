@@ -26,6 +26,8 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
     x_data = np.zeros(x_shape)
     y_data = np.zeros(y_shape)
 
+    n = 0
+
     for sample in range(num_samples // 2):
         main_index = random.choice(indexes)
         second_index = random.choice([index for index in indexes if index != main_index])
@@ -36,7 +38,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             second_sample1 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
             second_sample2 = load_random_slice_of_spectrogram(random.choice(grouped_data[second_index]), slice_width)
         except:
-            sample -= 1
             continue
 
         outputs = model.predict(np.array([main_sample1, main_sample2, second_sample1, second_sample2]))
@@ -46,8 +47,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         second_embedding_1 = output_helper.get_embedding(outputs[2])
         second_embedding_2 = output_helper.get_embedding(outputs[3])
         
-        print(main_embedding_1[:2])
-
         main_decoder_output_1 = output_helper.get_target_decoder_output(outputs[0])
         main_decoder_output_2 = output_helper.get_target_decoder_output(outputs[1])
         second_decoder_output_1 = output_helper.get_target_decoder_output(outputs[2])
@@ -65,11 +64,9 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             x_data[2 * sample] = main_sample1    
             y_data[2 * sample] = output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2)
 
-            x_data[2 * sample + 1] = main_sample1    
-            y_data[2 * sample + 1] = output_helper.get_target_output(main_embedding_2, second_embedding_1, main_decoder_output_2)
             # secondSample 1
-            #x_data[2 * sample + 1] = second_sample1
-            #y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_2, main_embedding_1, second_decoder_output_2)
+            x_data[2 * sample + 1] = second_sample1
+            y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_2, main_embedding_1, second_decoder_output_2)
         elif arg_min == 1:
             # mainSample 1
             x_data[2 * sample] = main_sample1
@@ -95,4 +92,6 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
             x_data[2 * sample + 1] = second_sample2
             y_data[2 * sample + 1] = output_helper.get_target_output(second_embedding_1, main_embedding_2, second_decoder_output_1)
 
-    return x_data, y_data
+        n += 1
+
+    return x_data[:n], y_data[:n]
