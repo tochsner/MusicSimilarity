@@ -12,10 +12,10 @@ import tensorflow as tf
 decoder_factor = 0.5
 
 epochs = 30
-batch_size = 16
+batch_size = 160
 batches_per_epoch = 1
 split_ratio = 0.8
-num_test_samples = 100
+batches_test_samples = 100
 
 lr = 0
 
@@ -38,8 +38,7 @@ model.compile(loss=losses.trio_loss,
 
 model.load_weights("/home/tobia/Documents/ML/Genre-Classification/augmented_final_0", by_name=True)
 
-test_data = create_quadruplets_for_similarity_learning(model, playlists_test, num_test_samples,
-                                                       output_helper, slice_width)
+model._make_predict_function()
 
 def training_sample_generator():
     while True:
@@ -47,4 +46,15 @@ def training_sample_generator():
                                                          output_helper, slice_width)
 
 
-model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch, validation_data=test_data, verbose=2)
+def test_sample_generator():
+    while True:
+        yield create_quadruplets_for_similarity_learning(model, playlists_test, batch_size,
+                                                         output_helper, slice_width)
+
+tdata = create_quadruplets_for_similarity_learning(model, playlists_train, batch_size,
+                                                         output_helper, slice_width)
+
+model.fit(tdata[0], tdata[1], epochs=5)
+
+#model.fit_generator(training_sample_generator(), epochs=epochs, steps_per_epoch=batches_per_epoch,
+#                    validation_data = test_sample_generator(), validation_steps=batches_test_samples, verbose=2)
