@@ -7,12 +7,16 @@ from models.simple_genre_model import *
 from helper.dataset_tools import *
 from helper.losses_similarity import *
 from keras.optimizers import SGD
+import random
 import tensorflow as tf
+
+np.random.seed(seed=0)
+random.seed(a=0)
 
 decoder_factor = 0.5
 
 epochs = 30
-batch_size = 160
+batch_size = 500
 batches_per_epoch = 1
 split_ratio = 0.8
 batches_test_samples = 100

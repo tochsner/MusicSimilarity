@@ -4,6 +4,7 @@ The custom losses for similarity with siamese networks with keras.
 
 from keras import backend as K
 from .prepare_triplets import *
+import tensorflow as tf
 
 class Losses:
     def __init__(self, output_helper, decoder_factor=0.5):
@@ -41,5 +42,14 @@ class Losses:
         target_embedding = self.output_helper.get_embedding(y_true)
         dissimilar_embedding = self.output_helper.get_dissimilar_embedding(y_true)
 
+        try:
+
+            with tf.Session().as_default():
+                with open("t.txt", "a+") as f:  
+                    f.write(output_embedding.eval())
+        except:
+            pass
+        
+
         return K.mean(K.cast(K.less(K.sum(K.square(output_embedding - target_embedding), axis=-1),
-                                    K.sum(K.square(output_embedding - dissimilar_embedding), axis=-1)), 'float16'))
+                                    K.sum(K.square(output_embedding - dissimilar_embedding), axis=-1)), K.floatx()))
