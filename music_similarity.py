@@ -6,7 +6,6 @@ This model can be used with or without pre-training.
 from models.simple_genre_model import *
 from helper.dataset_tools import *
 from helper.losses_similarity import *
-from keras.optimizers import SGD
 
 decoder_factor = 0.5
 
@@ -30,7 +29,7 @@ playlists_train, playlists_test = split_list(playlists, split_ratio)
 
 model = build_model(input_shape, embedding_length, decoder_output_length)
 model.compile(loss=losses.trio_loss,
-              optimizer=SGD(0.001),
+              optimizer='adam',
               metrics=[losses.quadruplet_metric])
 
 model._make_predict_function()
