@@ -58,7 +58,7 @@ def create_quadruplets_for_similarity_learning(model, grouped_data, num_samples,
         main_decoder_output_2 = output_helper.get_target_decoder_output(outputs[1])
         second_decoder_output_1 = output_helper.get_target_decoder_output(outputs[2])
         second_decoder_output_2 = output_helper.get_target_decoder_output(outputs[3])
-
+        
         costs = (mse.get_cost(main_embedding_1, second_embedding_1),
                  mse.get_cost(main_embedding_1, second_embedding_2),
                  mse.get_cost(main_embedding_2, second_embedding_1),

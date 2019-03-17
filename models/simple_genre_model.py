@@ -12,6 +12,10 @@ def std_layer_function(x):
     return k.var(x, axis=2, keepdims=True)
 
 
+def sigmoid_positive(x):
+    return 2 * (k.sigmoid(x) - 0.5)
+
+
 def build_model(input_shape, embedding_length, decoder_output_length):
     height = input_shape[0]
     width = input_shape[1]
@@ -35,12 +39,14 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     std_layer3 = Lambda(std_layer_function)(conv_layer3)
 
     concatenated1 = Concatenate()([avg_layer1, std_layer1, max_layer1])
-    concatenated2 = Concatenate()([avg_layer2, std_layer2, max_layer2])
+    concatenated2 = Concatenate()([avg_layer1, avg_layer2, avg_layer3])
     concatenated3 = Concatenate()([avg_layer3, std_layer3, max_layer3])
 
     flatten1 = Flatten()(concatenated1)
     flatten2 = Flatten()(concatenated2)
     flatten3 = Flatten()(concatenated3)
+
+    flatten2 = Lambda(sigmoid_positive)(flatten2)
 
     dense = Dense(120, activation='relu')(flatten3)
     encoder_output = Dense(embedding_length, activation='sigmoid')(dense)
@@ -48,10 +54,9 @@ def build_model(input_shape, embedding_length, decoder_output_length):
     dense = Dense(120, activation='relu')(encoder_output)
     decoder_output = Dense(decoder_output_length, activation='sigmoid')(dense)
 
-    target_decoder_output = Concatenate()([flatten1, flatten2, flatten3])
-    target_decoder_output = Activation('sigmoid')(target_decoder_output)
+#    target_decoder_output = Concatenate()([flatten2])
 
-    output_layer = Concatenate()([encoder_output, decoder_output, target_decoder_output])
+    output_layer = Concatenate()([encoder_output, decoder_output, flatten2])
 
     model = Model(inputs=input_layer, outputs=output_layer)
 
